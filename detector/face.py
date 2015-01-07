@@ -22,6 +22,4 @@ class Face(object):
 
         bitmap = cv.CreateImageHeader((image.shape[1], image.shape[0]), cv.IPL_DEPTH_8U, 3)
         cv.SetData(bitmap, image.tostring(), image.dtype.itemsize * 3 * image.shape[1])
-        cv.ShowImage('w1', bitmap)
-        cv.WaitKey(0)
-        cv.DestroyAllWindows()
+        return bitmap
