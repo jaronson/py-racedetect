@@ -1,0 +1,110 @@
+#!/usr/bin/env python
+
+import common
+import sys
+import numpy as np
+import cv2
+import cv2.cv as cv
+import utils
+import face
+
+def get_dist(a, b):
+    return np.linalg.norm(np.asarray(a) - np.asarray(b))
+
+if __name__ == '__main__':
+
+    detector   = face.Detector()
+    #recognizer = face.Recognizer()
+    #recognizer.load()
+
+    cam       = cv2.VideoCapture(0)
+    face_list = []
+
+    while True:
+        ret, frame = cam.read()
+        rects      = detector.find(frame)
+        vis        = frame.copy()
+
+        # Scenario 1: face_list is empty
+        if len(face_list) == 0:
+            # Make a face object for every rect
+            for rect in rects:
+                face_list.append(face.Face(rect))
+
+        # Scenario 2: There are fewer face objects than rects
+        elif len(face_list) <= len(rects):
+            used = len(face_list) * [False]
+
+            # Match existing face objects with a rect
+            for item in face_list:
+               # Find rects[index] that is closest to face f
+               # set used[index] to true so that it can't be used twice
+                record = 50000
+                index  = -1
+                count  = 0
+
+                for rect in rects:
+                    dist = get_dist([item.rect[0], item.rect[1]], [rect[0], rect[1]])
+                    if dist < record and not used[index]:
+                        record = dist
+                        index  = count
+
+                count += 1
+
+                # Update face object location
+                used[index] = True
+                item.update(rect)
+
+            # Add any unused faces
+            index = 0
+            for rect in rects:
+                if not used[index]:
+                    face_list.append(face.Face(rect))
+                index += 1
+
+        # Scenario 3: There are more face objects than rects
+        else:
+            # All face objects start out as available
+            for item in face_list:
+                item.available = True
+
+            for rect in rects:
+                # Find face object closest to rects[i]
+                # and set available to false
+                record = 50000
+                index  = -1
+                count  = 0
+
+                for item in face_list:
+                    dist = get_dist([item.rect[0], item.rect[1]], [rect[0], rect[1]])
+                    if dist < record and item.available:
+                        record = dist
+                        index  = count
+                    count += 1
+
+                item = face_list[index]
+                item.available = False
+                item.update(rect)
+
+            for item in face_list:
+                if item.available:
+                    item.decr()
+                    if item.dead():
+                        item.delete = True
+
+        for item in face_list:
+            if item.delete:
+                face_list = [ f for f in face_list if not f.id == item.id ]
+
+        for item in face_list:
+            (x,y,w,h) = item.rect
+            utils.draw_rects(vis, [ item.rect ], (0, 0, 255))
+            utils.draw_msg(vis, (x, y), str(item.id))
+
+        cv2.imshow('img2', vis)
+
+        if 0xFF & cv2.waitKey(5) == 27:
+            break
+
+    cv2.destroyAllWindows()
+    #recognizer.save()
