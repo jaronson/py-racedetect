@@ -110,10 +110,12 @@ if __name__ == '__main__':
                 if len(item.frames) < 50:
                     item.add_frame(frame)
                 else:
+                    # TODO: Add 'unknown' designator
                     recognizer.update(item.frames)
                     label, conf = recognizer.predict_from_frame(frame, item.rect)
                     print "Trained"
                     print "Predicted label = %d (confidence=%.2f)" % (label, conf)
+                    item.match_label = label
 
             elif item.match_label is None:
                 label, conf = recognizer.predict_from_frame(frame, item.rect)
