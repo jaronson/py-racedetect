@@ -11,12 +11,11 @@ import face
 def get_dist(a, b):
     return np.linalg.norm(np.asarray(a) - np.asarray(b))
 
-
 if __name__ == '__main__':
 
     detector   = face.Detector()
-    #recognizer = face.Recognizer()
-    #recognizer.load()
+    recognizer = face.Recognizer()
+    recognizer.load()
 
     cam       = cv2.VideoCapture(0)
     face_list = []
@@ -38,7 +37,7 @@ if __name__ == '__main__':
 
             # Match existing face objects with a rect
             for item in face_list:
-               # Find rects[index] that is closest to face f
+               # Find rects[index] that is closest to face
                # set used[index] to true so that it can't be used twice
                 record = 50000
                 index  = None
@@ -97,15 +96,37 @@ if __name__ == '__main__':
                     if item.dead():
                         item.delete = True
 
-        # Delete faces
         for item in face_list:
+            # Delete face
             if item.delete:
                 face_list = [ f for f in face_list if not f.id == item.id ]
 
         # Draw the faces
         for item in face_list:
             (x,y,w,h) = item.rect
-            utils.draw_rects(vis, [ item.rect ], (0, 0, 255))
+            color = (0, 255, 0)
+
+            if item.training:
+                if len(item.frames) < 50:
+                    item.add_frame(frame)
+                else:
+                    recognizer.update(item.frames)
+                    label, conf = recognizer.predict_from_frame(frame, item.rect)
+                    print "Trained"
+                    print "Predicted label = %d (confidence=%.2f)" % (label, conf)
+
+            elif item.match_label is None:
+                label, conf = recognizer.predict_from_frame(frame, item.rect)
+                print "No match, predicted label = %d (confidence=%.2f)" % (label, conf)
+
+                if conf >= 50.0:
+                    print 'Needs training'
+                    item.training = True
+                else:
+                    print 'Match found: %d' % label
+                    item.match_label = label
+
+            utils.draw_rects(vis, [ item.rect ], color)
             utils.draw_msg(vis, (x, y), str(item.id))
 
         cv2.imshow('img2', vis)
@@ -114,4 +135,4 @@ if __name__ == '__main__':
             break
 
     cv2.destroyAllWindows()
-    #recognizer.save()
+    recognizer.save()
