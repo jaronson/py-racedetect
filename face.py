@@ -37,11 +37,26 @@ class Face(object):
             return True
         return False
 
-    def update(self, newRect):
-        self.rect = newRect
-
     def decr(self):
         self.timer -= 1
+
+    def get_state(self):
+        if self.match_label is None and len(self.frames) == 0:
+            return 'new'
+        if self.match_label is None and len(self.frames) < 50:
+            return 'training'
+        if self.match_label is None and len(self.frames) >= 50:
+            return 'unmatched'
+        if self.match_label is not None:
+            return 'matched'
+        if self.match_label == -1:
+            return 'unknown'
+
+    def set_match(self, label):
+        self.match_label = label
+
+    def update(self, newRect):
+        self.rect = newRect
 
 class Detector(object):
     def __init__(self):
@@ -88,15 +103,15 @@ class Recognizer(object):
     def save(self):
         self.model.save(model_path)
 
-    def train(self, image_path):
+    def train(self):
         images, labels = self.__read_images(image_path)
 
         # Convert labels to 32bit integers. This is a workaround for 64bit machines.
         labels = np.asarray(labels, dtype=np.int32)
         self.model.train(np.asarray(images), labels)
+        self.labels = [ l for l in labels ]
 
     def update(self, images):
-        # TODO: Fixme
         self.get_labels()
         label = self.next_label()
         self.labels.append(label)
@@ -112,6 +127,9 @@ class Recognizer(object):
         if self.labels is not None:
             return self.labels
 
+        # TODO: There should be a method of accessing the FaceRecognizer's
+        # loaded label array. The C++ source doesn't seem to expose this
+        # though, hence the xml parsing garbage
         self.labels = []
         labels = ET.parse(model_path).find('labels').find('data').text
         labels = [ int(t) for t in labels.replace("\n",' ').split(' ') if not t == '' ]
