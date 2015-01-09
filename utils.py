@@ -14,3 +14,6 @@ def draw_msg(dest, (x, y), msg):
 def draw_rects(img, rects, color):
     for x1, y1, x2, y2 in rects:
         cv2.rectangle(img, (x1, y1), (x2, y2), color, 2)
+
+def get_dist(arr_a, arr_b):
+    return np.linalg.norm(np.asarray(arr_a) - np.asarray(arr_b))

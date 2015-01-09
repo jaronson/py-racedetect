@@ -8,9 +8,6 @@ import cv2.cv as cv
 import utils
 import face
 
-def get_dist(a, b):
-    return np.linalg.norm(np.asarray(a) - np.asarray(b))
-
 if __name__ == '__main__':
 
     detector   = face.Detector()
@@ -44,7 +41,7 @@ if __name__ == '__main__':
                 i      = 0
 
                 for rect in rects:
-                    dist = get_dist([item.rect[0], item.rect[1]], [rect[0], rect[1]])
+                    dist = utils.get_dist([item.rect[0], item.rect[1]], [rect[0], rect[1]])
 
                     if dist < record and not used[i]:
                         record = dist
@@ -77,7 +74,7 @@ if __name__ == '__main__':
                 i      = 0
 
                 for item in face_list:
-                    dist = get_dist([item.rect[0], item.rect[1]], [rect[0], rect[1]])
+                    dist = utils.get_dist([item.rect[0], item.rect[1]], [rect[0], rect[1]])
                     if dist < record and item.available:
                         record = dist
                         index  = i
