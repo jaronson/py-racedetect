@@ -3,6 +3,7 @@ import logging
 import cv2
 import utils
 import face
+import detector
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -10,7 +11,7 @@ logger = logging.getLogger(__name__)
 class FaceTracker(object):
     def __init__(self, opts = None):
         self.options  = opts
-        self.detector = face.Detector()
+        self.detector = detector.Face()
         self.matcher  = FaceMatcher(opts)
         self.faces    = []
         self.rects    = None
@@ -150,7 +151,7 @@ class FaceMatcher(object):
             label, dist = self.__predict(face_obj, frame)
             logger.info('Untrained face detected, predicted label: {0}, distance: {1}'.format(label, dist))
 
-            if dist >= 50:
+            if dist >= 100:
                 face_obj.add_frame(frame)
             else:
                 logger.info('Setting match for face id#{0} to label {1}'.format(face_obj.id, label))
@@ -163,7 +164,7 @@ class FaceMatcher(object):
             self.recognizer.update(face_obj.frames)
             label, dist = self.__predict(face_obj, frame)
 
-            if dist < 50:
+            if dist < 100:
                 logger.info('Matched face, predicted label: {0}, distance: {1}'.format(label, dist))
                 face_obj.set_match(label)
             else:
