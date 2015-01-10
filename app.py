@@ -4,9 +4,9 @@ import cv2
 import utils
 import face
 import detector
+import log
 
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
+logger = log.get_logger(__name__)
 
 class FaceTracker(object):
     def __init__(self, opts = None):

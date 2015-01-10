@@ -1,0 +1,9 @@
+{
+  "log": {
+    "level": "DEBUG"
+  },
+  "recognizer": {
+      "image_path": "/Users/joshuaaronson/Documents/colorferet/output",
+      "model_path": "tmp/facerec.xml"
+  }
+}

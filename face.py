@@ -6,12 +6,12 @@ import math
 import numpy as np
 import cv2
 import cv2.cv as cv
+import config
 import utils
 import detector
 import xml.etree.ElementTree as ET
 
-image_path = '/Users/joshuaaronson/Documents/colorferet/output'
-model_path = 'tmp/facerec.xml'
+APP_CONFIG = config.APP_CONFIG
 
 class Face(object):
     obj_count       = 0  # Count of found faces for incrementing ids
@@ -91,11 +91,16 @@ class Face(object):
 
 class Recognizer(object):
     def __init__(self):
-        self.model  = cv2.createLBPHFaceRecognizer()
-        self.labels = None
+        self.model   = cv2.createLBPHFaceRecognizer()
+        self.labels  = None
 
     def load(self):
-        self.model.load(model_path)
+        path = APP_CONFIG['recognizer']['model_path']
+
+        if os.path.isfile(path):
+            return self.model.load(path)
+
+        return False
 
     def predict_from_frame(self, frame, rect):
         (x,y,w,h) = rect
@@ -110,10 +115,10 @@ class Recognizer(object):
         return [label, confidence]
 
     def save(self):
-        self.model.save(model_path)
+        self.model.save(APP_CONFIG['recognizer']['model_path'])
 
     def train(self):
-        images, labels = self.read_images(image_path)
+        images, labels = self.read_images(APP_CONFIG['recognizer']['image_path'])
 
         # Convert labels to 32bit integers. This is a workaround for 64bit machines.
         labels = np.asarray(labels, dtype=np.int32)
@@ -140,7 +145,7 @@ class Recognizer(object):
         # loaded label array. The C++ source doesn't seem to expose this
         # though, hence the xml parsing garbage.
         self.labels = []
-        labels = ET.parse(model_path).find('labels').find('data').text
+        labels = ET.parse(APP_CONFIG['recognizer']['model_path']).find('labels').find('data').text
         labels = [ int(t) for t in labels.replace("\n",' ').split(' ') if not t == '' ]
         [self.labels.append(n) for n in labels if not self.labels.count(n)]
 
