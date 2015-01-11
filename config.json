@@ -4,6 +4,12 @@
   },
   "recognizer": {
       "image_path": "/Users/joshuaaronson/Documents/colorferet/output",
+      "face_training_limit": 50,
       "model_path": "tmp/facerec.xml"
+  },
+  "matcher": {
+      "face_timeout_seconds": 60,
+      "frame_collect_count": 50,
+      "distance_threshold": 65
   }
 }
