@@ -17,3 +17,11 @@ def draw_rects(img, rects, color):
 
 def get_dist(arr_a, arr_b):
     return np.linalg.norm(np.asarray(arr_a) - np.asarray(arr_b))
+
+def parse_and_convert_face(frame, rect):
+    (x,y,w,h) = rect
+    converted = frame.copy()
+    converted = cv2.cvtColor(converted, cv2.COLOR_BGR2GRAY)
+    converted = cv2.equalizeHist(converted)
+    converted = converted[y:h, x:w]
+    return converted
