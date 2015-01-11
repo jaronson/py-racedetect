@@ -127,7 +127,7 @@ class FaceTracker(object):
 
     def __read_video(self):
         ret, self.frame_in = self.video.read()
-        self.frame_out = self.frame_in.copy()
+        self.frame_out     = self.frame_in.copy()
 
 class FaceMatcher(object):
     def __init__(self, opts = None):
@@ -148,28 +148,47 @@ class FaceMatcher(object):
         state = face_obj.get_state()
 
         if state == 'new':
-            label, dist = self.__predict(face_obj, frame)
-            logger.info('Untrained face detected, predicted label: {0}, distance: {1}'.format(label, dist))
-
-            if dist >= 100:
-                face_obj.add_frame(frame)
-            else:
-                logger.info('Setting match for face id#{0} to label {1}'.format(face_obj.id, label))
-                face_obj.set_match(label)
-
+            logger.info('Detected new face #{0}'.format(face_obj.id))
+            face_obj.add_frame(frame)
         elif state == 'training':
             face_obj.add_frame(frame)
-
         elif state == 'unmatched':
-            self.recognizer.update(face_obj.frames)
-            label, dist = self.__predict(face_obj, frame)
+            threshold = face.Face.obj_distance_threshold
+            label, dist = self.__predict(face_obj)
 
-            if dist < 100:
-                logger.info('Matched face, predicted label: {0}, distance: {1}'.format(label, dist))
+            if dist < threshold:
                 face_obj.set_match(label)
+                logger.debug('Set match on face #{0} to label {1}'.format(face_obj.id, label))
             else:
-                logger.info('No match found, predicted label: {0}, distance: {1}'.format(label, dist))
-                face_obj.set_match(-1)
+                label = self.recognizer.update(face_obj.frames)
 
-    def __predict(self, face_obj, frame):
-        return self.recognizer.predict_from_frame(frame, face_obj.rect)
+                #label, dist = self.__predict(face_obj)
+
+                logger.debug('Adding match for face #{0} to label {1}'.format(face_obj.id, label))
+
+    # TODO: Account for number of matches in addition
+    # to match distance?
+    def __predict(self, face_obj):
+        match_dict = {}
+        matches    = []
+
+        logger.info('Attempting to match face #{0}'.format(face_obj.id))
+
+        for f in face_obj.frames:
+            label, dist = self.recognizer.predict_from_image(f)
+
+            if not label in match_dict.keys():
+                match_dict[label] = [dist]
+            else:
+                match_dict[label].append(dist)
+
+        for label in match_dict.keys():
+            l = match_dict[label]
+            matches.append((label, reduce(lambda x, y: x + y, l) / len(l)))
+
+        top = sorted(matches, key=lambda t: t[1])[0]
+
+        logger.debug('Found matches: {0}'.format(match_dict))
+        logger.debug('Top match: {0}'.format(top))
+
+        return top

@@ -9,15 +9,26 @@ import cv2.cv as cv
 import config
 import utils
 import detector
+import log
 import xml.etree.ElementTree as ET
 
 APP_CONFIG = config.APP_CONFIG
+logger = log.get_logger(__name__)
 
 class Face(object):
-    obj_count       = 0  # Count of found faces for incrementing ids
-    obj_timeout     = 60 # Timeout in seconds for each face
-    obj_frame_count = 50 # The number of frames to collect for matching
-    eye_detector    = detector.Eye()
+    # Count of found faces for incrementing ids
+    obj_count = 0
+
+    # Timeout in seconds for each face
+    obj_timeout = APP_CONFIG['matcher']['face_timeout_seconds']
+
+    # The number of frames to collect for matching
+    obj_frame_count = APP_CONFIG['matcher']['frame_collect_count']
+
+    # The number below which a match is considered found
+    obj_distance_threshold = APP_CONFIG['matcher']['distance_threshold']
+
+    eye_detector = detector.Eye()
 
     def __init__(self, rect):
         self.rect        = rect
@@ -32,13 +43,10 @@ class Face(object):
         Face.obj_count += 1;
 
     def add_frame(self, frame):
-        (x,y,w,h) = self.rect
-        gray      = frame[y:h, x:w]
-        gray      = cv2.cvtColor(gray, cv2.COLOR_BGR2GRAY)
-        gray      = cv2.equalizeHist(gray)
+        converted = utils.parse_and_convert_face(frame, self.rect)
         #img       = self.rotate(gray)
         #cv2.imwrite(('tmp/frame-%s.jpg'% len(self.frames)), img)
-        self.frames.append(gray)
+        self.frames.append(converted)
 
     def rotate(self, face_image):
         img   = face_image.copy()
@@ -103,16 +111,12 @@ class Recognizer(object):
         return False
 
     def predict_from_frame(self, frame, rect):
-        (x,y,w,h) = rect
-        gray = cv2.cvtColor(frame.copy(), cv2.COLOR_BGR2GRAY)
-        gray = cv2.equalizeHist(gray)
-        face = gray[y:h, x:w]
-
-        return self.predict_from_image(face)
+        converted = utils.parse_and_convert_face(frame, rect)
+        return self.predict_from_image(converted)
 
     def predict_from_image(self, image):
         label, confidence = self.model.predict(np.asarray(image))
-        return [label, confidence]
+        return (label, confidence)
 
     def save(self):
         self.model.save(APP_CONFIG['recognizer']['model_path'])
@@ -122,6 +126,8 @@ class Recognizer(object):
 
         # Convert labels to 32bit integers. This is a workaround for 64bit machines.
         labels = np.asarray(labels, dtype=np.int32)
+
+        logger.debug('Training model on {0} images'.format(len(images)))
         self.model.train(np.asarray(images), labels)
         self.labels = [ l for l in labels ]
 
@@ -133,6 +139,7 @@ class Recognizer(object):
         labels = len(images) * [label]
 
         self.model.update(np.asarray(images), np.asarray(labels))
+        return label
 
     def next_label(self):
         return self.get_labels()[-1] + 1
@@ -165,10 +172,18 @@ class Recognizer(object):
         subdirs = glob.glob('{0}/*'.format(path))
         count   = 0
 
+        # Set the limit from the config image_limit
+        if limit is None:
+            try:
+                limit = APP_CONFIG['recognizer']['face_training_limit']
+            except KeyError:
+                pass
+
         for subdir in subdirs:
             files = glob.glob('{0}/*.{1}'.format(subdir, ext))
 
             for f in files:
+                logger.debug('Loading file: {0}'.format(f))
                 image = self.__load_image(f, size=size)
 
                 if image is not None:
