@@ -25,3 +25,27 @@ def parse_and_convert_face(frame, rect):
     converted = cv2.equalizeHist(converted)
     converted = converted[y:h, x:w]
     return converted
+
+def rotate_face(self, face_image):
+    img   = face_image.copy()
+    (h,w) = img.shape[:2]
+    rects = Face.eye_detector.find(img)
+
+    if len(rects) != 2:
+        return
+
+    (e1, e2) = rects
+
+    if e1[0] < e2[0]:
+        (r, l) = (e1, e2)
+    else:
+        (r, l) = (e2, e1)
+
+    utils.draw_rects(img, rects, (0,255,0))
+
+    direction = (r[0] - l[0], r[1] - l[1])
+    rotation  = -math.atan2(float(direction[1]), float(direction[0]))
+    mat       = cv2.getRotationMatrix2D((l[0], l[1]), rotation, 1.0)
+    rotated   = cv2.warpAffine(img, mat, (w, h))
+    return rotated
+
