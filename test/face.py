@@ -1,5 +1,5 @@
 import unittest
-import face
+from racedetect import face
 
 image_path = '/Users/joshuaaronson/Documents/colorferet/output'
 
