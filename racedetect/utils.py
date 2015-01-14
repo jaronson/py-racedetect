@@ -1,7 +1,11 @@
+import base64
 import numpy as np
 import cv2
 import cv2.cv as cv
 import color
+import msgpack
+import msgpack_numpy
+msgpack_numpy.patch()
 
 def clock():
     return cv2.getTickCount() / cv2.getTickFrequency()
@@ -14,6 +18,14 @@ def draw_msg(dest, (x, y), msg):
 def draw_rects(img, rects, color):
     for x1, y1, x2, y2 in rects:
         cv2.rectangle(img, (x1, y1), (x2, y2), color, 2)
+
+def encode_image(img):
+    encoded = msgpack.packb(img, msgpack_numpy.encode)
+    return base64.b64encode(encoded)
+
+def decode_image(enc):
+    decoded = base64.b64decode(enc)
+    return msgpack.unpackb(decoded, object_hook=msgpack_numpy.decode)
 
 def get_dist(arr_a, arr_b):
     return np.linalg.norm(np.asarray(arr_a) - np.asarray(arr_b))

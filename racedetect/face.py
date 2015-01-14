@@ -6,11 +6,14 @@ import math
 import numpy as np
 import cv2
 import cv2.cv as cv
+import simplejson as json
+import xml.etree.ElementTree as ET
+
 import config
 import utils
 import detector
 import log
-import xml.etree.ElementTree as ET
+import store
 
 APP_CONFIG = config.APP_CONFIG
 logger = log.get_logger(__name__)
@@ -33,18 +36,23 @@ class Face(object):
     def __init__(self, rect):
         self.rect        = rect
         self.available   = True
-        self.training    = False
         self.delete      = False
         self.id          = Face.obj_count
         self.timer       = Face.obj_timeout
         self.match_label = None
         self.frames      = []
+        self.store       = store.Cache()
+        self.published   = False
+        self.frame_count = 0
+
+        self.store.subscribe('match')
 
         Face.obj_count += 1;
 
     def add_frame(self, frame):
         converted = utils.parse_and_convert_face(frame, self.rect)
         self.frames.append(converted)
+        self.frame_count += 1
 
     def dead(self):
         if self.timer < 0:
@@ -55,16 +63,29 @@ class Face(object):
         self.timer -= 1
 
     def get_state(self):
-        if self.match_label is None and len(self.frames) == 0:
+        if self.match_label is None and self.frame_count == 0:
             return 'new'
-        if self.match_label is None and len(self.frames) < Face.obj_frame_count:
+        if self.match_label is None and self.frame_count < Face.obj_frame_count:
             return 'training'
-        if self.match_label is None and len(self.frames) >= Face.obj_frame_count:
-            return 'unmatched'
+        if self.match_label is None and self.frame_count >= Face.obj_frame_count:
+            if self.published is True:
+                return 'published'
+            else:
+                return 'unmatched'
         if self.match_label is not None:
             return 'matched'
         if self.match_label == -1:
             return 'unknown'
+
+    def publish_frames(self):
+        if self.published is True:
+            return
+
+        key  = ('face/%s' % self.id)
+        data = [ utils.encode_image(f) for f in self.frames ]
+        ret  = self.store.set(key, json.dumps(data))
+        self.store.publish('match', key)
+        self.published = True
 
     def set_match(self, label):
         self.match_label = label

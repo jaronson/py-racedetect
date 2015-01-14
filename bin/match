@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 import argparse
-from racedetect.app import FaceTracker
+from racedetect.app import FaceMatcher
 
-def track():
+def match():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('-t', '--train', dest='train', action='store_true')
@@ -10,8 +10,8 @@ def track():
 
     args = parser.parse_args()
 
-    app = FaceTracker(args)
+    app = FaceMatcher(args)
     app.run()
 
 if __name__ == '__main__':
-    track()
+    match()

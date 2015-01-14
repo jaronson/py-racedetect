@@ -1,27 +1,36 @@
 import sys
-import logging
 import cv2
+import time
+import simplejson as json
 import utils
 import face
 import detector
 import log
-
-logger = log.get_logger(__name__)
+import store
 
 class FaceTracker(object):
     def __init__(self, opts = None):
         self.options  = opts
         self.detector = detector.Face()
-        self.matcher  = FaceMatcher(opts)
         self.faces    = []
         self.rects    = None
+        self.logger   = log.get_logger(__name__)
+        self.store    = store.Cache()
 
     def run(self):
         self.__init_video()
+        self.store.subscribe('track')
 
         while True:
             self.__read_video()
             self.rects = self.detector.find(self.frame_in)
+
+            msg   = self.store.get_message()
+            ident = None
+            label = None
+
+            if msg is not None:
+                ident, label = msg['data'].split('/')[1:3]
 
             # Scenario 1: face_list is empty
             if len(self.faces) == 0:
@@ -39,10 +48,15 @@ class FaceTracker(object):
             self.cull_faces()
 
             for f in self.faces:
+                if ident is not None:
+                    if f.id == int(ident):
+                        f.match_label = label
+
                 self.match_face(f)
                 self.draw_face(f)
 
             cv2.imshow('img2', self.frame_out)
+            time.sleep(0.001)
 
             if 0xFF & cv2.waitKey(5) == 27:
                 break
@@ -54,13 +68,29 @@ class FaceTracker(object):
 
     def draw_face(self, face_obj):
         (x,y,w,h) = face_obj.rect
-        color = (0, 255, 0)
+
+        if face_obj.get_state() == 'matched':
+            color = (0, 0, 255)
+            msg   = "id: #{0}, match: {1}".format(face_obj.id, face_obj.match_label)
+        else:
+            color = (0, 255, 0)
+            msg   = "id: #{0}".format(face_obj.id)
 
         utils.draw_rects(self.frame_out, [ face_obj.rect ], color)
-        utils.draw_msg(self.frame_out, (x, y), str(face_obj.id))
+        utils.draw_msg(self.frame_out, (x, y), msg)
 
     def match_face(self, face_obj):
-        self.matcher.match(face_obj, self.frame_in)
+        state = face_obj.get_state()
+
+        if state == 'new':
+            self.logger.info('Detected new face #{0}'.format(face_obj.id))
+            face_obj.add_frame(self.frame_in)
+        elif state == 'training':
+            self.logger.debug('Adding frame for face #{0}, #{1}'.format(face_obj.id, face_obj.frame_count))
+            face_obj.add_frame(self.frame_in)
+        elif state == 'unmatched':
+            self.logger.debug('Publishing frames for face #{0}'.format(face_obj.id))
+            face_obj.publish_frames()
 
     def mark_old_faces(self):
         # All face objects start out as available
@@ -132,49 +162,59 @@ class FaceTracker(object):
 class FaceMatcher(object):
     def __init__(self, opts = None):
         self.recognizer = face.Recognizer()
+        self.logger     = log.get_logger(__name__)
+        self.store      = store.Cache()
 
         if opts and opts.train:
-            logger.info('Training face recognizer')
+            self.logger.info('Training face recognizer')
             self.recognizer.train()
         else:
-            logger.info('Loading face recognizer')
+            self.logger.info('Loading face recognizer')
             self.recognizer.load()
 
     def __del__(self):
-        logger.info('Saving face recognizer')
+        self.logger.info('Saving face recognizer')
         self.recognizer.save()
 
-    def match(self, face_obj, frame):
-        state = face_obj.get_state()
+    def run(self):
+        self.store.subscribe('match')
+        self.logger.info('Waiting for messages')
 
-        if state == 'new':
-            logger.info('Detected new face #{0}'.format(face_obj.id))
-            face_obj.add_frame(frame)
-        elif state == 'training':
-            face_obj.add_frame(frame)
-        elif state == 'unmatched':
-            threshold = face.Face.obj_distance_threshold
-            label, dist = self.__predict(face_obj)
+        while True:
+            msg = self.store.get_message()
 
-            if dist < threshold:
-                face_obj.set_match(label)
-                logger.debug('Set match on face #{0} to label {1}'.format(face_obj.id, label))
-            else:
-                label = self.recognizer.update(face_obj.frames)
+            if msg is not None:
+                self.logger.info('Message recieved: {0}'.format(msg))
+                self.match(msg['data'])
 
-                #label, dist = self.__predict(face_obj)
+            time.sleep(0.001)
 
-                logger.debug('Adding match for face #{0} to label {1}'.format(face_obj.id, label))
+    def match(self, key):
+        ident       = key.split('/')[1]
+        images      = [ utils.decode_image(i) for i in json.loads(self.store.get(key)) ]
+        threshold   = face.Face.obj_distance_threshold
+        label, dist = self.__predict(ident, images)
+
+        if dist < threshold:
+            self.logger.debug('Set match on face #{0} to label {1}'.format(ident, label))
+        else:
+            self.logger.debug('Adding match for face #{0} to label {1}'.format(ident, label))
+            label = self.recognizer.update(images)
+
+        self.store.publish('track', 'face/{0}/{1}'.format(ident, label))
+        self.store.delete(key)
+
+        return (label, dist)
 
     # TODO: Account for number of matches in addition
     # to match distance?
-    def __predict(self, face_obj):
+    def __predict(self, ident, images):
         match_dict = {}
         matches    = []
 
-        logger.info('Attempting to match face #{0}'.format(face_obj.id))
+        self.logger.info('Attempting to match face #{0}'.format(ident))
 
-        for f in face_obj.frames:
+        for f in images:
             label, dist = self.recognizer.predict_from_image(f)
 
             if not label in match_dict.keys():
@@ -188,7 +228,7 @@ class FaceMatcher(object):
 
         top = sorted(matches, key=lambda t: t[1])[0]
 
-        logger.debug('Found matches: {0}'.format(match_dict))
-        logger.debug('Top match: {0}'.format(top))
+        self.logger.debug('Found matches: {0}'.format(match_dict))
+        self.logger.debug('Top match: {0}'.format(top))
 
         return top
