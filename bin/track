@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import argparse
-from racedetect.app import FaceTracker
+from racedetect.tracker import FaceTracker
 
 def track():
     parser = argparse.ArgumentParser()

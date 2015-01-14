@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import argparse
-from racedetect.app import FaceMatcher
+from racedetect.matcher import FaceMatcher
 
 def match():
     parser = argparse.ArgumentParser()
