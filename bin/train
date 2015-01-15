@@ -1,0 +1,28 @@
+#!/usr/bin/env python
+import argparse
+from racedetect.face import Recognizer
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('-p', '--path', dest='path', help='Path from which to load images')
+    parser.add_argument('-o', '--out', dest='out', help='Where to write the resultant XML')
+    parser.add_argument('-l', '--limit', dest='limit', help='Number of faces to load')
+    parser.add_argument('-e', '--ext', dest='ext', help='Image file extension, sans "."')
+    parser.add_argument('-s', '--size', dest='size', help='Convert images to this size')
+
+    parser.set_defaults(path=None, limit=50, ext='png', size=None)
+
+    args = parser.parse_args()
+
+    train_args = {
+            'limit': args.limit,
+            'path':  args.path,
+            'ext':   args.ext,
+            'size':  args.size
+            }
+
+    recog = Recognizer()
+    recog.train(**train_args)
+
+    recog.save(args.out)

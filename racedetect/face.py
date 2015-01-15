@@ -84,7 +84,6 @@ class Face(object):
         key  = ('face/%s' % self.id)
         data = [ utils.encode_image(f) for f in self.frames ]
         ret  = self.store.set(key, json.dumps(data))
-        self.store.publish('match', key)
         self.published = True
 
     def set_match(self, label):
@@ -95,8 +94,8 @@ class Face(object):
 
 class Recognizer(object):
     def __init__(self):
-        self.model   = cv2.createLBPHFaceRecognizer()
-        self.labels  = None
+        self.model  = cv2.createLBPHFaceRecognizer()
+        self.labels = None
 
     def load(self):
         path = APP_CONFIG['recognizer']['model_path']
@@ -114,11 +113,14 @@ class Recognizer(object):
         label, confidence = self.model.predict(np.asarray(image))
         return (label, confidence)
 
-    def save(self):
-        self.model.save(APP_CONFIG['recognizer']['model_path'])
+    def save(self, outpath=None):
+        if outpath is None:
+            outpath = APP_CONFIG['recognizer']['model_path']
 
-    def train(self):
-        images, labels = self.read_images(APP_CONFIG['recognizer']['image_path'])
+        self.model.save(outpath)
+
+    def train(self, **kwargs):
+        images, labels = self.read_images(**kwargs)
 
         # Convert labels to 32bit integers. This is a workaround for 64bit machines.
         labels = np.asarray(labels, dtype=np.int32)
@@ -162,18 +164,19 @@ class Recognizer(object):
     #   face_a.png
     # The directory numbers are the labels.
     # In the above case, the labels will be [ 1, 1, 2 ].
-    def read_images(self, path, limit=None, size=None, ext='png'):
+    def read_images(self, path=None, limit=None, size=None, ext='png'):
         images  = []
         labels  = []
-        subdirs = glob.glob('{0}/*'.format(path))
         count   = 0
 
-        # Set the limit from the config image_limit
+        # Set some defaults
+        if path is None:
+            path = APP_CONFIG['recognizer']['image_path']
+
         if limit is None:
-            try:
-                limit = APP_CONFIG['recognizer']['face_training_limit']
-            except KeyError:
-                pass
+            limit = APP_CONFIG['recognizer']['face_training_limit']
+
+        subdirs = glob.glob('{0}/*'.format(path))
 
         for subdir in subdirs:
             files = glob.glob('{0}/*.{1}'.format(subdir, ext))
@@ -189,7 +192,7 @@ class Recognizer(object):
             count += 1
 
             if limit is not None and count >= limit:
-                return [images, labels]
+                break
 
         return [images, labels]
 
@@ -198,7 +201,7 @@ class Recognizer(object):
             image = cv2.imread(filepath, cv2.IMREAD_GRAYSCALE)
 
             if size is not None:
-                image = cv2.resize(image, size)
+                image = cv2.resize(image, (size, size))
             return np.asarray(image, dtype=np.uint8)
         except IOError, (errno, strerror):
             print "I/O error({0}): {1}".format(errno, strerror)

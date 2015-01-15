@@ -18,6 +18,9 @@ class Cache(object):
     def get_message(self):
         return self.pubsub.get_message()
 
+    def keys(self, pattern):
+        return self.conn.keys(pattern)
+
     def publish(self, channel, data):
         return self.conn.publish(channel, data)
 

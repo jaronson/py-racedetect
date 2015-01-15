@@ -28,11 +28,10 @@ class FaceMatcher(object):
         logger.info('Waiting for messages')
 
         while True:
-            msg = self.store.get_message()
+            keys = self.store.keys('face/*')
 
-            if msg is not None:
-                logger.info('Message recieved: {0}'.format(msg))
-                self.match(msg['data'])
+            for key in keys:
+                self.match(key)
 
             time.sleep(0.001)
 
@@ -45,9 +44,10 @@ class FaceMatcher(object):
         if dist < threshold:
             logger.debug('Set match on face #{0} to label {1}'.format(ident, label))
         else:
-            logger.debug('Adding match for face #{0} to label {1}'.format(ident, label))
+            logger.debug('Training on face #{0}'.format(ident, label))
             label = self.recognizer.update(images)
 
+        logger.debug('Added face #{0} to library, label: {1}'.format(ident, label))
         self.store.publish('track', 'face/{0}/{1}'.format(ident, label))
         self.store.delete(key)
 
