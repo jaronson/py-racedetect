@@ -93,11 +93,13 @@ class Face(object):
 
 class Recognizer(object):
     def __init__(self):
-        self.model  = cv2.createLBPHFaceRecognizer()
-        self.labels = None
+        self.model      = cv2.createLBPHFaceRecognizer()
+        self.model_path = None
+        self.labels     = None
 
-    def load(self):
-        path = config.get('recognizer.model_path')
+    def load(self, path=None):
+        path = path if path else config.get('recognizer.model_path')
+        self.model_path = path
 
         if os.path.isfile(path):
             return self.model.load(path)
@@ -113,9 +115,7 @@ class Recognizer(object):
         return (label, confidence)
 
     def save(self, outpath=None):
-        if outpath is None:
-            outpath = config.get('recognizer.model_path')
-
+        outpath = outpath if outpath else config.get('recognizer.model_path')
         self.model.save(outpath)
 
     def train(self, **kwargs):
@@ -149,7 +149,7 @@ class Recognizer(object):
         # loaded label array. The C++ source doesn't seem to expose this
         # though, hence the xml parsing garbage.
         self.labels = []
-        labels = ET.parse(config.get('recognizer.model_path')).find('labels').find('data').text
+        labels = ET.parse(self.model_path).find('labels').find('data').text
         labels = [ int(t) for t in labels.replace("\n",' ').split(' ') if not t == '' ]
         [self.labels.append(n) for n in labels if not self.labels.count(n)]
 
