@@ -15,7 +15,6 @@ import detector
 import log
 import store
 
-APP_CONFIG = config.APP_CONFIG
 logger = log.get_logger(__name__)
 
 class Face(object):
@@ -23,13 +22,13 @@ class Face(object):
     obj_count = 0
 
     # Timeout in seconds for each face
-    obj_timeout = APP_CONFIG['matcher']['face_timeout_seconds']
+    obj_timeout = config.get('matcher.face_timeout_seconds')
 
     # The number of frames to collect for matching
-    obj_frame_count = APP_CONFIG['matcher']['frame_collect_count']
+    obj_frame_count = config.get('matcher.frame_collect_count')
 
     # The number below which a match is considered found
-    obj_distance_threshold = APP_CONFIG['matcher']['distance_threshold']
+    obj_distance_threshold = config.get('matcher.distance_threshold')
 
     eye_detector = detector.Eye()
 
@@ -98,7 +97,7 @@ class Recognizer(object):
         self.labels = None
 
     def load(self):
-        path = APP_CONFIG['recognizer']['model_path']
+        path = config.get('recognizer.model_path')
 
         if os.path.isfile(path):
             return self.model.load(path)
@@ -115,7 +114,7 @@ class Recognizer(object):
 
     def save(self, outpath=None):
         if outpath is None:
-            outpath = APP_CONFIG['recognizer']['model_path']
+            outpath = config.get('recognizer.model_path')
 
         self.model.save(outpath)
 
@@ -150,7 +149,7 @@ class Recognizer(object):
         # loaded label array. The C++ source doesn't seem to expose this
         # though, hence the xml parsing garbage.
         self.labels = []
-        labels = ET.parse(APP_CONFIG['recognizer']['model_path']).find('labels').find('data').text
+        labels = ET.parse(config.get('recognizer.model_path')).find('labels').find('data').text
         labels = [ int(t) for t in labels.replace("\n",' ').split(' ') if not t == '' ]
         [self.labels.append(n) for n in labels if not self.labels.count(n)]
 
@@ -165,18 +164,14 @@ class Recognizer(object):
     # The directory numbers are the labels.
     # In the above case, the labels will be [ 1, 1, 2 ].
     def read_images(self, path=None, limit=None, size=None, ext='png'):
+        # Set some defaults
+        path  = path if path else config.get('recognizer.image_path')
+        limit = int(limit) if limit else config.get('recognizer.face_training_limit')
+
+        subdirs = glob.glob('{0}/*'.format(path))
         images  = []
         labels  = []
         count   = 0
-
-        # Set some defaults
-        if path is None:
-            path = APP_CONFIG['recognizer']['image_path']
-
-        if limit is None:
-            limit = APP_CONFIG['recognizer']['face_training_limit']
-
-        subdirs = glob.glob('{0}/*'.format(path))
 
         for subdir in subdirs:
             files = glob.glob('{0}/*.{1}'.format(subdir, ext))
@@ -202,6 +197,7 @@ class Recognizer(object):
 
             if size is not None:
                 image = cv2.resize(image, (size, size))
+
             return np.asarray(image, dtype=np.uint8)
         except IOError, (errno, strerror):
             print "I/O error({0}): {1}".format(errno, strerror)

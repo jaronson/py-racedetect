@@ -31,6 +31,6 @@ class Cache(object):
         return self.pubsub.subscribe(*channels)
 
     def __connect(self):
-        return StrictRedis(host=APP_CONFIG['redis']['host'],
-                port=APP_CONFIG['redis']['port'],
+        return StrictRedis(host=config.get('redis.host'),
+                port=config.get('redis.port'),
                 db=0)

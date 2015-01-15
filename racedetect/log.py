@@ -1,7 +1,6 @@
 import logging
 import config
 
-config = config.APP_CONFIG
 levels = {
         'DEBUG': logging.DEBUG,
         'INFO':  logging.INFO,
@@ -9,10 +8,9 @@ levels = {
         'ERROR': logging.ERROR
         }
 
-try:
-    LEVEL = levels[config['log']['level']]
-except KeyError:
-    LEVEL = 'INFO'
+LEVEL = config.get('log.level')
+LEVEL = LEVEL if LEVEL else 'INFO'
+LEVEL = levels[LEVEL]
 
 logging.basicConfig(level=LEVEL)
 
