@@ -1,6 +1,6 @@
 import simplejson
 
-APP_CONFIG = simplejson.load(open('config.json'))
+APP_CONFIG = simplejson.load(open('config/config.json'))
 
 def get(key):
     parts = key.split('.')
