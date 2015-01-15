@@ -1,6 +1,7 @@
 import cv2
 import cv2.cv as cv
 import utils
+import config
 
 class BaseDetector(object):
     def __init__(self):
@@ -14,10 +15,10 @@ class BaseDetector(object):
                 }
 
     def find(self, image):
-        raise 'BaseDetector.find is not implemented'
+        raise NotImplementedError
 
     def load_cascade(self):
-        raise 'BaseDetector.load_cascade is not implemented'
+        raise NotImplementedError
 
     def get_rects(self, image):
         rects = self.cascade.detectMultiScale(image, **self.detect_args)
@@ -34,20 +35,18 @@ class BaseDetector(object):
         gray = cv2.equalizeHist(gray)
         return gray
 
-class Face(BaseDetector):
+class FaceDetector(BaseDetector):
     def find(self, image):
         image = self.convert_image(image)
         return self.get_rects(image)
 
     def load_cascade(self):
-        self.cascade = cv2.CascadeClassifier('cascades/lbp/frontalface.xml')
+        self.cascade = cv2.CascadeClassifier(config.get('detector.face.cascade'))
 
-class Eye(BaseDetector):
+class EyeDetector(BaseDetector):
     def load_cascade(self):
-        self.cascade = cv2.CascadeClassifier('cascades/haar/eye.xml')
+        self.cascade = cv2.CascadeClassifier(config.get('detector.eye.cascade'))
 
     def find(self, image):
         rects = self.get_rects(image)
         return rects
-        #utils.draw_rects(image, rects, (0,255,0))
-        #return image

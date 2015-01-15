@@ -2,16 +2,17 @@ import cv2
 import time
 import utils
 import face
-import detector
 import log
 import store
+
+from detector import FaceDetector
 
 logger = log.get_logger(__name__)
 
 class FaceTracker(object):
     def __init__(self, opts = None):
         self.options  = opts
-        self.detector = detector.Face()
+        self.detector = FaceDetector()
         self.faces    = []
         self.rects    = None
         self.store    = store.Cache()

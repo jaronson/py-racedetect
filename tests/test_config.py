@@ -10,6 +10,3 @@ class TestConfig(unittest.TestCase):
     def test_get_with_bad_key(self):
         val = config.get('recognizer.test_key')
         self.assertEqual(val, None)
-
-if __name__ == '__main__':
-    unittest.main()

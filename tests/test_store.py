@@ -27,6 +27,3 @@ class TestStore(unittest.TestCase):
             time.sleep(0.05)
 
         self.assertEqual(found, 'test message')
-
-if __name__ == '__main__':
-    unittest.main()

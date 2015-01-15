@@ -12,6 +12,3 @@ class TestRecognizer(unittest.TestCase):
         unique_labels  = set(labels)
 
         self.assertEqual(len(set(labels)), 10)
-
-if __name__ == '__main__':
-    unittest.main()

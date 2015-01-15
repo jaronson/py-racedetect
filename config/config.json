@@ -7,6 +7,14 @@
       "port": 6379,
       "db": 0
   },
+  "detector": {
+      "face": {
+          "cascade": "cascades/lbp/frontalface.xml"
+      },
+      "eye": {
+          "cascade": "cascades/haar/eye.xml"
+      }
+  },
   "recognizer": {
       "image_path": "/Users/joshuaaronson/Documents/colorferet/output",
       "face_training_limit": 50,

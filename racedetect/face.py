@@ -30,8 +30,6 @@ class Face(object):
     # The number below which a match is considered found
     obj_distance_threshold = config.get('matcher.distance_threshold')
 
-    eye_detector = detector.Eye()
-
     def __init__(self, rect):
         self.rect        = rect
         self.available   = True
