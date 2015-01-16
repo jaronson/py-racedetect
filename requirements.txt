@@ -2,5 +2,5 @@ CherryPy==3.6.0
 simplejson==2.5.2
 argparse==1.2.1
 ws4py==0.3.4
-opencv==2.4.9
-numpy
+numpy==1.9.1
+scipy==0.15.0

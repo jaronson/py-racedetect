@@ -31,7 +31,7 @@ class BaseDetector(object):
         return rects
 
     def convert_image(self, image):
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        gray = utils.safely_to_grayscale(image)
         gray = cv2.equalizeHist(gray)
         return gray
 

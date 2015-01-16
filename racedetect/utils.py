@@ -1,5 +1,6 @@
 import base64
 import numpy as np
+import scipy as sp
 import cv2
 import cv2.cv as cv
 import color
@@ -7,8 +8,12 @@ import msgpack
 import msgpack_numpy
 msgpack_numpy.patch()
 
-def clock():
-    return cv2.getTickCount() / cv2.getTickFrequency()
+def crop_and_convert_face(frame, rect):
+    (x,y,w,h) = rect
+    converted = safely_to_grayscale(frame.copy())
+    converted = cv2.equalizeHist(converted)
+    converted = converted[y:h, x:w]
+    return converted
 
 def draw_msg(dest, (x, y), msg):
     font = cv2.FONT_HERSHEY_PLAIN
@@ -18,6 +23,46 @@ def draw_msg(dest, (x, y), msg):
 def draw_rects(img, rects, color):
     for x1, y1, x2, y2 in rects:
         cv2.rectangle(img, (x1, y1), (x2, y2), color, 2)
+
+def equalize_halves(face_img):
+    img  = face_img.copy()
+    w,h  = img.shape[1], img.shape[0]
+    midX = w / 2
+
+    # Equalize left and right halves separately
+    left  = cv2.equalizeHist(img[0:h, 0:midX])
+    right = cv2.equalizeHist(img[0:h, midX:w])
+
+    whole = img
+
+    # Combine the left and right halves
+    # smoothing the transition between
+    for (x,y), value in np.ndenumerate(img):
+
+        # left 25%
+        if x < w/4:
+            v = left[y][x]
+
+        # left 25 - 50%
+        elif x < w*2/4:
+            lv = left[y][x]
+            wv = whole[y][x]
+            f  = (float(x) - w*1/4) / (w * 0.25)
+            v  = cv.Round((1 - f) * lv + (f) * wv)
+
+        # right 50 - 75%
+        elif x < w*3/4:
+            rv = right[y][x-midX]
+            wv = whole[y][x]
+            f  = (float(x) - w*2/4) / (w * 0.25)
+            v  = cv.Round((1 - f) * wv + (f) * rv)
+
+        # right 75 - 100%
+        else:
+            v = right[y][x-midX]
+        img[y][x] = v
+
+    return img
 
 def encode_image(img):
     encoded = msgpack.packb(img, msgpack_numpy.encode)
@@ -29,14 +74,6 @@ def decode_image(enc):
 
 def get_dist(arr_a, arr_b):
     return np.linalg.norm(np.asarray(arr_a) - np.asarray(arr_b))
-
-def parse_and_convert_face(frame, rect):
-    (x,y,w,h) = rect
-    converted = frame.copy()
-    converted = cv2.cvtColor(converted, cv2.COLOR_BGR2GRAY)
-    converted = cv2.equalizeHist(converted)
-    converted = converted[y:h, x:w]
-    return converted
 
 def rotate_face(self, face_image):
     img   = face_image.copy()
@@ -61,3 +98,7 @@ def rotate_face(self, face_image):
     rotated   = cv2.warpAffine(img, mat, (w, h))
     return rotated
 
+def safely_to_grayscale(image):
+    if len(image.shape) > 2:
+        return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    return image

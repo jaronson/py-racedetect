@@ -1,6 +1,6 @@
 {
   "log": {
-    "level": "DEBUG"
+    "level": "INFO"
   },
   "redis": {
       "host": "127.0.0.1",
