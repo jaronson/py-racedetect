@@ -17,6 +17,7 @@
   },
   "recognizer": {
       "image_path": "path-to-feret-images",
+      "image_extension": "png",
       "face_training_limit": 50,
       "model_path": "tmp/facerec.xml"
   },
