@@ -1,4 +1,7 @@
 {
+  "training": {
+    "asset_path": "/Users/jaronson/Downloads/colorferet/mutated"
+  },
   "log": {
     "level": "INFO"
   },
@@ -8,15 +11,10 @@
       "db": 0
   },
   "detector": {
-      "face": {
-          "cascade": "cascades/lbp/frontalface.xml"
-      },
-      "eye": {
-          "cascade": "cascades/haar/eye.xml"
-      }
+      "face_cascade": "cascades/lbp/frontalface.xml",
+      "eye_cascade":  "cascades/haar/eye.xml"
   },
   "recognizer": {
-      "image_path": "path-to-feret-images",
       "image_extension": "png",
       "face_training_limit": 50,
       "model_path": "tmp/facerec.xml"
