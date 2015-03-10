@@ -33,7 +33,7 @@ data/
 ```
 
 Use a crappy script like this or write a better one to format your data.
-```
+``` ruby
 Dir.glob('dvd1/data/images/*').each do |dir|
   Dir.glob("#{dir}/*").each do |file|
     base = file.split('.').first
