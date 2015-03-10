@@ -50,3 +50,6 @@ Dir.glob('dvd1/data/images/*').each do |dir|
   end
 end
 ```
+
+## Testing
+`python -m unittest discover`
