@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby
 require 'json'
 require 'fileutils'
 
@@ -19,6 +20,8 @@ class FeretMutator
   attr_reader :grounds_dir
 
   def initialize(inpath, outpath)
+    raise 'WTF? Give me an inpath & outpath pls' unless inpath && outpath
+
     @inpath  = inpath
     @outpath = outpath
   end
@@ -65,6 +68,19 @@ class FeretMutator
     {}.tap do |hash|
       File.read(path).split("\n").each do |line|
         k,v = line.split('=')
+
+        next if [ 'compression' ].include?(k)
+
+        if k == 'relative'
+          v = File.basename(v).split('.').first
+          v = "#{v}.png"
+          k = 'filename'
+        end
+
+        if k == 'format'
+          v = 'png'
+        end
+
         hash[k] = v
       end
     end
@@ -84,5 +100,5 @@ class FeretMutator
 end
 
 if __FILE__ == $0
-  FeretMutator.new.mutate
+  FeretMutator.new(ARGV[0], ARGV[1]).mutate
 end
