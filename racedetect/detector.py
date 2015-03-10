@@ -41,11 +41,11 @@ class FaceDetector(BaseDetector):
         return self.get_rects(image)
 
     def load_cascade(self):
-        self.cascade = cv2.CascadeClassifier(config.get('detector.face.cascade'))
+        self.cascade = cv2.CascadeClassifier(config.get('detector.face_cascade'))
 
 class EyeDetector(BaseDetector):
     def load_cascade(self):
-        self.cascade = cv2.CascadeClassifier(config.get('detector.eye.cascade'))
+        self.cascade = cv2.CascadeClassifier(config.get('detector.eye_cascade'))
 
     def find(self, image):
         rects = self.get_rects(image)

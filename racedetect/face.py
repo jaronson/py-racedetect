@@ -163,7 +163,7 @@ class Recognizer(object):
     # In the above case, the labels will be [ 1, 1, 2 ].
     def read_images(self, path=None, limit=None, size=None, ext=None):
         # Set some defaults
-        path  = path if path else config.get('recognizer.image_path')
+        path  = path if path else config.get('training.asset_path')
         limit = int(limit) if limit else config.get('recognizer.face_training_limit')
 
         if ext is None:
