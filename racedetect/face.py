@@ -161,10 +161,13 @@ class Recognizer(object):
     #   face_a.png
     # The directory numbers are the labels.
     # In the above case, the labels will be [ 1, 1, 2 ].
-    def read_images(self, path=None, limit=None, size=None, ext='jpg'):
+    def read_images(self, path=None, limit=None, size=None, ext=None):
         # Set some defaults
         path  = path if path else config.get('recognizer.image_path')
         limit = int(limit) if limit else config.get('recognizer.face_training_limit')
+
+        if ext is None:
+            ext = config.get('recognizer.image_extension') or 'png'
 
         subdirs = glob.glob('{0}/*'.format(path))
         images  = []
