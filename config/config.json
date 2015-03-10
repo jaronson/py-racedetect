@@ -16,7 +16,8 @@
       }
   },
   "recognizer": {
-      "image_path": "/Users/joshuaaronson/Documents/colorferet/output",
+      "image_path": "/Users/jaronson/Downloads/colorferet/dvd1/data/images",
+      "image_ext": "jpg",
       "face_training_limit": 50,
       "model_path": "tmp/facerec.xml"
   },

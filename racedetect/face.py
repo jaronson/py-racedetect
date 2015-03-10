@@ -47,7 +47,7 @@ class Face(object):
         Face.obj_count += 1;
 
     def add_frame(self, frame):
-        converted = utils.crop_and_convert(frame, self.rect)
+        converted = utils.crop_and_convert_face(frame, self.rect)
         self.frames.append(converted)
         self.frame_count += 1
 
@@ -161,7 +161,7 @@ class Recognizer(object):
     #   face_a.png
     # The directory numbers are the labels.
     # In the above case, the labels will be [ 1, 1, 2 ].
-    def read_images(self, path=None, limit=None, size=None, ext='png'):
+    def read_images(self, path=None, limit=None, size=None, ext='jpg'):
         # Set some defaults
         path  = path if path else config.get('recognizer.image_path')
         limit = int(limit) if limit else config.get('recognizer.face_training_limit')
