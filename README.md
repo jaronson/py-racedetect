@@ -5,7 +5,7 @@ The core of an untitled interactive art installation.
 ## Installation
 ```
 brew install opencv
-export PYTHONPATH=/usr/local/;Cellar/opencv/2.4.9/include/python2.7:$PYTHONPATH
+export PYTHONPATH=/usr/local/Cellar/opencv/2.4.9/include/python2.7:$PYTHONPATH
 pip install -r requirements.txt
 ```
 
