@@ -3,6 +3,7 @@ import glob
 import simplejson as json
 import utils
 import config
+import cv2
 from decorators import memoize
 
 class FeretImage(object):
@@ -11,6 +12,10 @@ class FeretImage(object):
 
         self.__dict__.update(truths)
         self.__set_age(person)
+
+    @memoize
+    def get_mat(self):
+        return cv2.imread(self.path)
 
     def __set_age(self, person):
         capture_year    = self.capture_date.split('/')[-1]

@@ -1,5 +1,6 @@
 import unittest
 import simplejson as json
+import numpy as np
 from racedetect import config
 from racedetect import feret
 
@@ -24,6 +25,18 @@ class TestFeretPerson(unittest.TestCase):
         self.assertEqual(image.person_label, '00001')
         self.assertEqual(image.person_age, 50)
         self.assertEqual(image.filename, '00001_930831_fa_a.png')
+
+class TestFeretImage(unittest.TestCase):
+    def setUp(self):
+        manifest    = json.load(open('tests/data/manifest.json'))
+        self.truths = manifest[0]
+        self.person = feret.FeretPerson(self.truths)
+        self.image  = self.person.images[0]
+
+    def test_get_mat(self):
+        mat = self.image.get_mat()
+        self.assertTrue(type(mat) == np.ndarray)
+        self.assertTrue(len(mat) > 0)
 
 class TestFeretDatabase(unittest.TestCase):
     def setUp(self):
