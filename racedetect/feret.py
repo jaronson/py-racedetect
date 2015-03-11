@@ -31,11 +31,24 @@ class FeretPerson(object):
         self.images = [ FeretImage(self, i) for i in self.image_data ]
 
 class FeretDatabase(object):
+    RACE_KEY_MAP = {
+            'Asian-Middle-Eastern':      'me',
+            'Pacific-Islander':          'pi',
+            'Native-American':           'na',
+            'Asian-Southern':            'as',
+            'Hispanic':                  'h',
+            'Other':                     'o',
+            'Asian':                     'a',
+            'Black-or-African-American': 'b',
+            'White':                     'w',
+            }
+
     def __init__(self, path):
-        self.path     = path
-        filepath      = os.path.join(path, 'manifest.json')
-        self.manifest = json.load(open(filepath))
-        self.__all    = None
+        self.path         = path
+        filepath          = os.path.join(path, 'manifest.json')
+        self.manifest     = json.load(open(filepath))
+        self.race_key_map = FeretDatabase.RACE_KEY_MAP
+        self.__all        = None
 
     @memoize
     def all(self):
@@ -46,8 +59,10 @@ class FeretDatabase(object):
         d = {}
 
         for p in self.all():
-            if not d.has_key(p.race):
-                d[p.race] = []
+            key = self.race_key_map[p.race]
 
-            d[p.race].append(p)
+            if not d.has_key(key):
+                d[key] = []
+
+            d[key].append(p)
         return d

@@ -40,23 +40,19 @@ class TestFeretImage(unittest.TestCase):
 
 class TestFeretDatabase(unittest.TestCase):
     def setUp(self):
-        self.database = feret.FeretDatabase(config.get('training.asset_path'))
+        self.database     = feret.FeretDatabase(config.get('training.asset_path'))
+        self.race_key_map = feret.FeretDatabase.RACE_KEY_MAP
 
     def test_all(self):
         self.database.all()
 
+    def test_race_keys_uniqueness(self):
+        keys = self.race_key_map.values()
+        self.assertTrue(len(keys) == len(set(keys)))
+
     def test_all_by_race(self):
         by_race = self.database.all_by_race()
-        keys    = [
-                'Asian-Middle-Eastern',
-                'Pacific-Islander',
-                'Native-American',
-                'Asian-Southern',
-                'Hispanic',
-                'Other',
-                'Asian',
-                'Black-or-African-American',
-                'White'
-                ]
+        keys    = self.race_key_map.values()
+
         for key in keys:
             self.assertTrue(len(by_race[key]) > 0)
