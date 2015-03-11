@@ -1,6 +1,8 @@
 import unittest
 import simplejson as json
 import numpy as np
+import cv2
+
 from racedetect import config
 from racedetect import feret
 
@@ -36,8 +38,31 @@ class TestFeretImage(unittest.TestCase):
 
     def test_normalized_mat(self):
         mat = self.image.normalized_mat()
+
         self.assertTrue(type(mat) == np.ndarray)
         self.assertTrue(len(mat) > 0)
+        self.assertTrue(self.image.face_found)
+
+        cv2.imwrite('tmp/{0}-normalized.jpg'.format(self.person.label), mat)
+
+    def test_lbp(self):
+        lbp = self.image.lbp()
+        self.assertTrue(len(lbp) > 0)
+
+        cv2.imwrite('tmp/{0}-lbp.jpg'.format(self.person.label), np.asarray(lbp, dtype=np.uint8))
+
+    def test_lbp_histogram(self):
+        lbp   = self.image.lbp()
+        hist  = self.image.histogram()
+        lhist = self.image.lbp_histogram()
+
+        for i in hist:
+            print i,
+        print ""
+
+        for i in lhist:
+            print i,
+        print ""
 
 class TestFeretDatabase(unittest.TestCase):
     def setUp(self):

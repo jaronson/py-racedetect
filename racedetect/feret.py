@@ -1,10 +1,12 @@
 import os
 import glob
+import numpy as np
 import simplejson as json
 import cv2
 import utils
 import config
 
+from skimage.feature import local_binary_pattern
 from decorators import memoize
 from detector import FaceDetector
 
@@ -13,24 +15,67 @@ class FeretImage(object):
 
     def __init__(self, person, truths):
         self.person_label = person.label
+        self.face_found   = False
 
         self.__dict__.update(truths)
         self.__set_age(person)
 
     @memoize
+    def mat(self):
+        return cv2.imread(self.path)
+
+    @memoize
     def normalized_mat(self):
-        image = cv2.imread(self.path)
+        mat = self.mat()
 
         try:
-            rect = FeretImage.detector.find(image)[0]
+            rect = FeretImage.detector.find(mat)[0]
+            self.face_found = True
         except IndexError:
             rect = None
 
-        return utils.normalize_face(image, rect=rect)
+        return utils.normalize_face(mat, rect=rect)
 
     @memoize
     def histogram(self):
-        pass
+        return cv2.calcHist(
+                [self.normalized_mat()],
+                [0],
+                None,
+                [256],
+                [0,256]
+                )
+
+    @memoize
+    def lbp(self):
+        # See: http://www.cse.unr.edu/~bebis/IJAIT12_Race.pdf
+        # Their best case was 10x16 block size per 60x48
+        # pixel image which is a ratio of 1:18.
+        image     = self.normalized_mat()
+        w,h       = image.shape
+        neighbors = 8
+        radius    = 1
+
+        import pdb; pdb.set_trace()
+
+        return local_binary_pattern(
+                image,
+                neighbors,
+                radius,
+                method='default'
+                )
+
+    @memoize
+    def lbp_histogram(self):
+        lbp = np.asarray(self.lbp(), dtype=np.uint8)
+
+        return cv2.calcHist(
+                [lbp],
+                [0],
+                None,
+                [256],
+                [0,256]
+                )
 
     def __set_age(self, person):
         capture_year    = self.capture_date.split('/')[-1]

@@ -7,3 +7,4 @@ msgpack-python==0.4.5
 msgpack-numpy
 redis
 scikit-learn
+scikit-image
