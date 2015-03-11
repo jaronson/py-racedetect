@@ -22,8 +22,9 @@ class FeretMutator
   def initialize(inpath, outpath)
     raise 'WTF? Give me an inpath & outpath pls' unless inpath && outpath
 
-    @inpath  = inpath
-    @outpath = outpath
+    @inpath   = inpath
+    @outpath  = outpath
+    @manifest = []
   end
 
   def mutate
@@ -35,6 +36,10 @@ class FeretMutator
       @grounds_dir = File.join(data_dir, 'ground_truths', 'name_value')
 
       mutate_images
+    end
+
+    File.open(File.join(outpath, 'manifest.json'), 'w') do |f|
+      f.write(JSON.dump(@manifest))
     end
   end
 
@@ -61,6 +66,8 @@ class FeretMutator
       File.open(File.join(outdir, 'truths.json'), 'w') do |f|
         f.write(JSON.pretty_generate(truths))
       end
+
+      @manifest << truths
     end
   end
 
