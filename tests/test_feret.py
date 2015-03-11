@@ -35,4 +35,7 @@ class TestFeretDatabase(unittest.TestCase):
         self.database = feret.FeretDatabase(config.get('training.asset_path'))
 
     def test_all(self):
-        self.database.all(self.database)
+        self.database.all()
+
+    def test_all_by_race(self):
+        by_race = self.database.all_by_race()

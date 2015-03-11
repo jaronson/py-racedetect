@@ -4,6 +4,7 @@
     "gender": "Male",
     "yob": "1943",
     "race": "White",
+    "label": "00001",
     "images": [
       {
         "recording": "cfrR00002",
@@ -65,7 +66,8 @@
     "id": "cfrS00002",
     "gender": "Male",
     "yob": "1963",
-    "race": "White",
+    "race": "Black",
+    "label": "00002",
     "images": [
       {
         "recording": "cfrR00007",

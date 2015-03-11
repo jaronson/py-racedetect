@@ -21,18 +21,20 @@ class FeretPerson(object):
     # loading the dirname as the label,
     # truths.json and any images
     def __init__(self, path):
-        self.path = path
+        self.path     = path
+        self.__loaded = False
 
     def load(self):
-        parts      = self.path.split('/')
-        self.label = parts[-1]
-
+        if self.__loaded:
+            return
         self.__load_truths()
+        self.__loaded = True
 
     def __load_truths(self):
         path   = os.path.join(self.path, 'truths.json')
         truths = json.load(open(path))
         images = truths.pop('images', None)
+        print repr(truths)
 
         self.__dict__.update(truths)
         self.__load_images(images)
@@ -49,4 +51,17 @@ class FeretDatabase(object):
 
     @memoize
     def all(self):
-        [ FeretPerson(self.path) for p in self.manifest ]
+        return [ FeretPerson(os.path.join(self.path, p['label'])) for p in self.manifest ]
+
+    @memoize
+    def all_by_race(self):
+        d = {}
+
+        for p in self.all():
+            p.load()
+
+            if not d.has_key(p.race):
+                d[p.race] = []
+
+            d[p.race].append(p)
+        return d
