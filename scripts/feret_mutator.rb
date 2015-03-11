@@ -51,8 +51,8 @@ class FeretMutator
       image_glob = "#{label_dir}/#{IMAGE_GLOB}"
 
       truths           = parse_grounds(File.join(grounds_dir, label, "#{label}.txt"))
+      truths['label']  = label
       truths['images'] = []
-
 
       mkdir outdir unless File.exist?(outdir)
 
@@ -94,6 +94,7 @@ class FeretMutator
   end
 
   def copy_and_convert_image(label, filepath)
+    return
     basefile  = File.basename(filepath).split('.').first
     converted = File.join(outpath, label, "#{basefile}.png")
     zipped    = File.join(outpath, label, "#{basefile}.ppm.bz2")
