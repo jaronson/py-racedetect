@@ -31,7 +31,8 @@
         "environment": "cfrE00001",
         "sensor": "cfrN00002",
         "illuminant": "cfrI00001 cfrI00002 cfrI00003",
-        "weather": "inside"
+        "weather": "inside",
+        "path": "tests/data/00001/00001_930831_fa_a.png"
       },
       {
         "recording": "cfrR00003",
@@ -58,7 +59,8 @@
         "environment": "cfrE00001",
         "sensor": "cfrN00002",
         "illuminant": "cfrI00001 cfrI00002 cfrI00003",
-        "weather": "inside"
+        "weather": "inside",
+        "path": "tests/data/00001/00001_930831_fb_a.png"
       }
     ]
   },
@@ -66,7 +68,7 @@
     "id": "cfrS00002",
     "gender": "Male",
     "yob": "1963",
-    "race": "Black",
+    "race": "White",
     "label": "00002",
     "images": [
       {
@@ -94,7 +96,8 @@
         "environment": "cfrE00001",
         "sensor": "cfrN00002",
         "illuminant": "cfrI00001 cfrI00002 cfrI00003",
-        "weather": "inside"
+        "weather": "inside",
+        "path": "tests/data/00002/00002_930831_fa.png"
       },
       {
         "recording": "cfrR00013",
@@ -117,7 +120,8 @@
         "environment": "cfrE00001",
         "sensor": "cfrN00001",
         "illuminant": "cfrI00001 cfrI00002 cfrI00003",
-        "weather": "inside"
+        "weather": "inside",
+        "path": "tests/data/00002/00002_931230_fa.png"
       },
       {
         "recording": "cfrR00018",
@@ -144,7 +148,8 @@
         "environment": "cfrE00001",
         "sensor": "cfrN00002",
         "illuminant": "cfrI00001 cfrI00002 cfrI00003",
-        "weather": "inside"
+        "weather": "inside",
+        "path": "tests/data/00002/00002_940128_fa.png"
       },
       {
         "recording": "cfrR00024",
@@ -171,7 +176,8 @@
         "environment": "cfrE00001",
         "sensor": "cfrN00002",
         "illuminant": "cfrI00001 cfrI00002 cfrI00003",
-        "weather": "inside"
+        "weather": "inside",
+        "path": "tests/data/00002/00002_940422_fa.png"
       },
       {
         "recording": "cfrR00031",
@@ -198,7 +204,8 @@
         "environment": "cfrE00001",
         "sensor": "cfrN00002",
         "illuminant": "cfrI00001 cfrI00002 cfrI00003",
-        "weather": "inside"
+        "weather": "inside",
+        "path": "tests/data/00002/00002_940928_fa.png"
       },
       {
         "recording": "cfrR00008",
@@ -225,7 +232,8 @@
         "environment": "cfrE00001",
         "sensor": "cfrN00002",
         "illuminant": "cfrI00001 cfrI00002 cfrI00003",
-        "weather": "inside"
+        "weather": "inside",
+        "path": "tests/data/00002/00002_930831_fb.png"
       },
       {
         "recording": "cfrR00014",
@@ -248,7 +256,8 @@
         "environment": "cfrE00001",
         "sensor": "cfrN00001",
         "illuminant": "cfrI00001 cfrI00002 cfrI00003",
-        "weather": "inside"
+        "weather": "inside",
+        "path": "tests/data/00002/00002_931230_fb.png"
       },
       {
         "recording": "cfrR00019",
@@ -275,7 +284,8 @@
         "environment": "cfrE00001",
         "sensor": "cfrN00002",
         "illuminant": "cfrI00001 cfrI00002 cfrI00003",
-        "weather": "inside"
+        "weather": "inside",
+        "path": "tests/data/00002/00002_940128_fb.png"
       },
       {
         "recording": "cfrR00025",
@@ -302,7 +312,8 @@
         "environment": "cfrE00001",
         "sensor": "cfrN00002",
         "illuminant": "cfrI00001 cfrI00002 cfrI00003",
-        "weather": "inside"
+        "weather": "inside",
+        "path": "tests/data/00002/00002_940422_fb.png"
       },
       {
         "recording": "cfrR00032",
@@ -329,7 +340,8 @@
         "environment": "cfrE00001",
         "sensor": "cfrN00002",
         "illuminant": "cfrI00001 cfrI00002 cfrI00003",
-        "weather": "inside"
+        "weather": "inside",
+        "path": "tests/data/00002/00002_940928_fb.png"
       },
       {
         "recording": "cfrR00037",
@@ -352,7 +364,8 @@
         "environment": "cfrE00001",
         "sensor": "cfrN00002",
         "illuminant": "cfrI00001 cfrI00002 cfrI00003",
-        "weather": "inside"
+        "weather": "inside",
+        "path": "tests/data/00002/00002_940928_rb.png"
       },
       {
         "recording": "cfrR00038",
@@ -375,7 +388,8 @@
         "environment": "cfrE00001",
         "sensor": "cfrN00002",
         "illuminant": "cfrI00001 cfrI00002 cfrI00003",
-        "weather": "inside"
+        "weather": "inside",
+        "path": "tests/data/00002/00002_940928_rc.png"
       }
     ]
   }

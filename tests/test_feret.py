@@ -5,30 +5,25 @@ from racedetect import feret
 
 class TestFeretPerson(unittest.TestCase):
     def setUp(self):
-        self.path   = 'tests/data/00001'
-        self.truths = json.load(open('tests/data/00001/truths.json'))
-        self.person = feret.FeretPerson(self.path)
+        manifest    = json.load(open('tests/data/manifest.json'))
+        self.truths = manifest[0]
 
     def test_load(self):
-        self.person.load()
-        self.assertEqual(self.person.label, '00001')
-        self.assertEqual(self.person.id, self.truths['id'])
-        self.assertEqual(self.person.gender, self.truths['gender'])
-        self.assertEqual(self.person.race, self.truths['race'])
-        self.assertEqual(self.person.yob, self.truths['yob'])
+        person = feret.FeretPerson(self.truths)
 
-class TestFeretImage(unittest.TestCase):
-    def setUp(self):
-        self.path   = 'tests/data/00001'
-        self.person = feret.FeretPerson(self.path)
-        self.person.load()
+        self.assertEqual(person.label, '00001')
+        self.assertEqual(person.id, self.truths['id'])
+        self.assertEqual(person.gender, self.truths['gender'])
+        self.assertEqual(person.race, self.truths['race'])
+        self.assertEqual(person.yob, self.truths['yob'])
 
-        self.image = self.person.images[0]
+    def test_images(self):
+        person = feret.FeretPerson(self.truths)
+        image  = person.images[0]
 
-    def test_init(self):
-        self.assertEqual(self.image.person_label, '00001')
-        self.assertEqual(self.image.person_age, 50)
-        self.assertEqual(self.image.filename, '00001_930831_fa_a.png')
+        self.assertEqual(image.person_label, '00001')
+        self.assertEqual(image.person_age, 50)
+        self.assertEqual(image.filename, '00001_930831_fa_a.png')
 
 class TestFeretDatabase(unittest.TestCase):
     def setUp(self):

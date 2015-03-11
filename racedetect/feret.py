@@ -20,27 +20,10 @@ class FeretPerson(object):
     # takes a path to an asset directory
     # loading the dirname as the label,
     # truths.json and any images
-    def __init__(self, path):
-        self.path     = path
-        self.__loaded = False
-
-    def load(self):
-        if self.__loaded:
-            return
-        self.__load_truths()
-        self.__loaded = True
-
-    def __load_truths(self):
-        path   = os.path.join(self.path, 'truths.json')
-        truths = json.load(open(path))
-        images = truths.pop('images', None)
-        print repr(truths)
-
+    def __init__(self, truths):
+        self.image_data = truths.pop('images', None)
         self.__dict__.update(truths)
-        self.__load_images(images)
-
-    def __load_images(self, images):
-        self.images = [ FeretImage(self, i) for i in images ]
+        self.images = [ FeretImage(self, i) for i in self.image_data ]
 
 class FeretDatabase(object):
     def __init__(self, path):
@@ -51,15 +34,13 @@ class FeretDatabase(object):
 
     @memoize
     def all(self):
-        return [ FeretPerson(os.path.join(self.path, p['label'])) for p in self.manifest ]
+        return [ FeretPerson(p) for p in self.manifest ]
 
     @memoize
     def all_by_race(self):
         d = {}
 
         for p in self.all():
-            p.load()
-
             if not d.has_key(p.race):
                 d[p.race] = []
 

@@ -57,15 +57,18 @@ class FeretMutator
       mkdir outdir unless File.exist?(outdir)
 
       Dir.glob(image_glob).each do |image_filepath|
-        image_l  = File.basename(image_filepath).split('.').first
-        ground_f = File.join(grounds_dir, label, "#{image_l}.txt")
-        truths['images'] << parse_grounds(ground_f)
-        copy_and_convert_image(label, image_filepath)
+        image_l         = File.basename(image_filepath).split('.').first
+        ground_f        = File.join(grounds_dir, label, "#{image_l}.txt")
+        grounds         = parse_grounds(ground_f)
+        converted       = copy_and_convert_image(label, image_filepath)
+        grounds['path'] = converted
+
+        truths['images'] << grounds
       end
 
-      File.open(File.join(outdir, 'truths.json'), 'w') do |f|
-        f.write(JSON.pretty_generate(truths))
-      end
+      # File.open(File.join(outdir, 'truths.json'), 'w') do |f|
+      #   f.write(JSON.pretty_generate(truths))
+      # end
 
       @manifest << truths
     end
@@ -94,16 +97,17 @@ class FeretMutator
   end
 
   def copy_and_convert_image(label, filepath)
-    return
     basefile  = File.basename(filepath).split('.').first
-    converted = File.join(outpath, label, "#{basefile}.png")
     zipped    = File.join(outpath, label, "#{basefile}.ppm.bz2")
     unzipped  = File.join(outpath, label, "#{basefile}.ppm")
+    converted = File.join(outpath, label, "#{basefile}.png")
 
     cp(filepath, zipped) unless File.exist?(zipped)
     system("bzip2 -d #{zipped}")
     system("convert #{unzipped} #{converted}")
     rm(unzipped)
+
+    converted
   end
 end
 
