@@ -34,3 +34,16 @@ class TestFeretDatabase(unittest.TestCase):
 
     def test_all_by_race(self):
         by_race = self.database.all_by_race()
+        keys    = [
+                'Asian-Middle-Eastern',
+                'Pacific-Islander',
+                'Native-American',
+                'Asian-Southern',
+                'Hispanic',
+                'Other',
+                'Asian',
+                'Black-or-African-American',
+                'White'
+                ]
+        for key in keys:
+            self.assertTrue(len(by_race[key]) > 0)
