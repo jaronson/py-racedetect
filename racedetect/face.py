@@ -47,7 +47,7 @@ class Face(object):
         Face.obj_count += 1;
 
     def add_frame(self, frame):
-        converted = utils.crop_and_convert_face(frame, self.rect)
+        converted = utils.normalize_face(frame, rect=self.rect)
         self.frames.append(converted)
         self.frame_count += 1
 
@@ -105,7 +105,7 @@ class Recognizer(object):
         return False
 
     def predict_from_frame(self, frame, rect):
-        converted = utils.crop_and_convert_face(frame, rect)
+        converted = utils.normalize_face(frame, rect=rect)
         return self.predict_from_image(converted)
 
     def predict_from_image(self, image):

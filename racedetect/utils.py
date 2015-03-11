@@ -8,13 +8,6 @@ import msgpack
 import msgpack_numpy
 msgpack_numpy.patch()
 
-def crop_and_convert_face(frame, rect):
-    (x,y,w,h) = rect
-    converted = safely_to_grayscale(frame.copy())
-    converted = cv2.equalizeHist(converted)
-    converted = converted[y:h, x:w]
-    return converted
-
 def draw_msg(dest, (x, y), msg):
     font = cv2.FONT_HERSHEY_PLAIN
     cv2.putText(dest, msg, (x + 1, y + 1), font, 1.0, color.BLACK, thickness=2, lineType=cv2.CV_AA) # Shadow
@@ -24,8 +17,7 @@ def draw_rects(img, rects, color):
     for x1, y1, x2, y2 in rects:
         cv2.rectangle(img, (x1, y1), (x2, y2), color, 2)
 
-def equalize_halves(face_img):
-    img  = face_img.copy()
+def equalize_halves(img):
     w,h  = img.shape[1], img.shape[0]
     midX = w / 2
 
@@ -74,6 +66,16 @@ def decode_image(enc):
 
 def get_dist(arr_a, arr_b):
     return np.linalg.norm(np.asarray(arr_a) - np.asarray(arr_b))
+
+def normalize_face(image, rect=None):
+    if rect is not None:
+        (x,y,w,h) = rect
+        image     = image[y:h, x:w]
+
+    normalized = safely_to_grayscale(image.copy())
+    normalized = equalize_halves(normalized)
+    normalized = cv2.equalizeHist(normalized)
+    return normalized
 
 def rotate_face(self, face_image):
     img   = face_image.copy()

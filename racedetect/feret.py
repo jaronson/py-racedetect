@@ -1,12 +1,16 @@
 import os
 import glob
 import simplejson as json
+import cv2
 import utils
 import config
-import cv2
+
 from decorators import memoize
+from detector import FaceDetector
 
 class FeretImage(object):
+    detector = FaceDetector()
+
     def __init__(self, person, truths):
         self.person_label = person.label
 
@@ -14,8 +18,19 @@ class FeretImage(object):
         self.__set_age(person)
 
     @memoize
-    def get_mat(self):
-        return cv2.imread(self.path)
+    def normalized_mat(self):
+        image = cv2.imread(self.path)
+
+        try:
+            rect = FeretImage.detector.find(image)[0]
+        except IndexError:
+            rect = None
+
+        return utils.normalize_face(image, rect=rect)
+
+    @memoize
+    def histogram(self):
+        pass
 
     def __set_age(self, person):
         capture_year    = self.capture_date.split('/')[-1]

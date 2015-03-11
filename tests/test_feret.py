@@ -34,8 +34,8 @@ class TestFeretImage(unittest.TestCase):
         self.person = feret.FeretPerson(self.truths)
         self.image  = self.person.images[0]
 
-    def test_get_mat(self):
-        mat = self.image.get_mat()
+    def test_normalized_mat(self):
+        mat = self.image.normalized_mat()
         self.assertTrue(type(mat) == np.ndarray)
         self.assertTrue(len(mat) > 0)
 
