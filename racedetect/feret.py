@@ -28,7 +28,16 @@ class FeretPerson(object):
     def __init__(self, truths):
         self.image_data = truths.pop('images', None)
         self.__dict__.update(truths)
+        self.__set_age()
         self.images = [ FeretImage(self, i) for i in self.image_data ]
+
+    # Set age to date images taken - yob. The
+    # year taken can vary from 1993 to 1996
+    # so default to 1993. A better indication
+    # can be had from each image.
+    def __set_age(self):
+        capture_year = 1993
+        self.age     = capture_year - int(self.yob)
 
 class FeretDatabase(object):
     RACE_KEY_MAP = {
@@ -45,10 +54,9 @@ class FeretDatabase(object):
 
     def __init__(self, path):
         self.path         = path
-        filepath          = os.path.join(path, 'manifest.json')
-        self.manifest     = json.load(open(filepath))
         self.race_key_map = FeretDatabase.RACE_KEY_MAP
-        self.__all        = None
+        self.filepath     = os.path.join(path, 'manifest.json')
+        self.manifest     = json.load(open(self.filepath))
 
     @memoize
     def all(self):

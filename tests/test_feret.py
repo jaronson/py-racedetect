@@ -17,6 +17,7 @@ class TestFeretPerson(unittest.TestCase):
         self.assertEqual(person.gender, self.truths['gender'])
         self.assertEqual(person.race, self.truths['race'])
         self.assertEqual(person.yob, self.truths['yob'])
+        self.assertEqual(person.age, 50)
 
     def test_images(self):
         person = feret.FeretPerson(self.truths)
