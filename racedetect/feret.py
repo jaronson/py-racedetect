@@ -48,15 +48,9 @@ class FeretImage(object):
 
     @memoize
     def lbp(self):
-        # See: http://www.cse.unr.edu/~bebis/IJAIT12_Race.pdf
-        # Their best case was 10x16 block size per 60x48
-        # pixel image which is a ratio of 1:18.
         image     = self.normalized_mat()
-        w,h       = image.shape
         neighbors = 8
         radius    = 1
-
-        import pdb; pdb.set_trace()
 
         return local_binary_pattern(
                 image,
@@ -66,25 +60,49 @@ class FeretImage(object):
                 )
 
     @memoize
-    def lbp_histogram(self):
-        lbp = np.asarray(self.lbp(), dtype=np.uint8)
+    def lbp_histograms(self):
+        image    = self.normalized_mat()
+        n_points = 8
+        radius   = 1
+        lbp      = local_binary_pattern(
+                        image,
+                        n_points,
+                        radius,
+                        method='default'
+                        )
 
-        return cv2.calcHist(
-                [lbp],
-                [0],
-                None,
-                [256],
-                [0,256]
-                )
+        # See: http://www.cse.unr.edu/~bebis/IJAIT12_Race.pdf
+        # Their best case was 10x16 block size per 60x48
+        # pixel image which equates to rows 1/6 high and
+        # 1/3 wide.
+        n_rows, n_cols   = (6, 3)
+        image_h, image_w = lbp.shape[:2]
+        block_w, block_h = (image_w / n_cols, image_h / n_rows)
+
+        hists = []
+        #blocks = np.empty((image_w, image_h), np.uint8)
+
+        for i in range(n_rows):
+            for j in range(n_cols):
+                x = block_w * j
+                y = block_h * i
+                h = y + block_h
+                w = x + block_w
+                hist = cv2.calcHist(
+                    [self.normalized_mat()],
+                    [0],
+                    None,
+                    [256],
+                    [0,256]
+                    )
+                hists.append(hist)
+        return hists
 
     def __set_age(self, person):
         capture_year    = self.capture_date.split('/')[-1]
         self.person_age = int(capture_year) - int(person.yob)
 
 class FeretPerson(object):
-    # takes a path to an asset directory
-    # loading the dirname as the label,
-    # truths.json and any images
     def __init__(self, truths):
         self.image_data = truths.pop('images', None)
         self.__dict__.update(truths)

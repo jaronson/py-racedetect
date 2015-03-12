@@ -51,18 +51,9 @@ class TestFeretImage(unittest.TestCase):
 
         cv2.imwrite('tmp/{0}-lbp.jpg'.format(self.person.label), np.asarray(lbp, dtype=np.uint8))
 
-    def test_lbp_histogram(self):
-        lbp   = self.image.lbp()
-        hist  = self.image.histogram()
-        lhist = self.image.lbp_histogram()
-
-        for i in hist:
-            print i,
-        print ""
-
-        for i in lhist:
-            print i,
-        print ""
+    def test_lbp_histograms(self):
+        hists = self.image.lbp_histograms()
+        self.assertTrue(len(hists) > 0)
 
 class TestFeretDatabase(unittest.TestCase):
     def setUp(self):
