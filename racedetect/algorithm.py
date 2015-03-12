@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-import utils
 from skimage import feature
 
 def histogram(image):
@@ -19,6 +18,7 @@ def local_binary_pattern(image, neighbors=8, radius=1, method='default'):
             radius,
             method
             )
+
 def lbp_histograms(image):
     lbp = local_binary_pattern(image)
 
