@@ -5,8 +5,8 @@ import simplejson as json
 import cv2
 import utils
 import config
+import algorithm
 
-from skimage.feature import local_binary_pattern
 from decorators import memoize
 from detector import FaceDetector
 
@@ -38,65 +38,15 @@ class FeretImage(object):
 
     @memoize
     def histogram(self):
-        return cv2.calcHist(
-                [self.normalized_mat()],
-                [0],
-                None,
-                [256],
-                [0,256]
-                )
+        return algorithm.histogram(self.normalized_mat())
 
     @memoize
     def lbp(self):
-        image     = self.normalized_mat()
-        neighbors = 8
-        radius    = 1
-
-        return local_binary_pattern(
-                image,
-                neighbors,
-                radius,
-                method='default'
-                )
+        return algorithm.local_binary_pattern(self.normalized_mat())
 
     @memoize
     def lbp_histograms(self):
-        image    = self.normalized_mat()
-        n_points = 8
-        radius   = 1
-        lbp      = local_binary_pattern(
-                        image,
-                        n_points,
-                        radius,
-                        method='default'
-                        )
-
-        # See: http://www.cse.unr.edu/~bebis/IJAIT12_Race.pdf
-        # Their best case was 10x16 block size per 60x48
-        # pixel image which equates to rows 1/6 high and
-        # 1/3 wide.
-        n_rows, n_cols   = (6, 3)
-        image_h, image_w = lbp.shape[:2]
-        block_w, block_h = (image_w / n_cols, image_h / n_rows)
-
-        hists = []
-        #blocks = np.empty((image_w, image_h), np.uint8)
-
-        for i in range(n_rows):
-            for j in range(n_cols):
-                x = block_w * j
-                y = block_h * i
-                h = y + block_h
-                w = x + block_w
-                hist = cv2.calcHist(
-                    [self.normalized_mat()],
-                    [0],
-                    None,
-                    [256],
-                    [0,256]
-                    )
-                hists.append(hist)
-        return hists
+        return algorithm.lbp_histograms(self.normalized_mat())
 
     def __set_age(self, person):
         capture_year    = self.capture_date.split('/')[-1]
