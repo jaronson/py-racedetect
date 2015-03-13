@@ -40,7 +40,7 @@ class FeretImage(object):
 
     @memoize
     def lbp(self):
-        return algorithm.local_binary_pattern(self.normalized_mat())
+        return algorithm.local_binary_patterns(self.normalized_mat())
 
     @memoize
     def lbp_histograms(self):
