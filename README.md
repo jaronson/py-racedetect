@@ -1,6 +1,6 @@
-# race-detect
+# py-racedetect
 
-The core of an untitled interactive art installation.
+py-racedetect is a live face detection & recognition application using OpenCV's python bindings.
 
 ## Installation
 ```
